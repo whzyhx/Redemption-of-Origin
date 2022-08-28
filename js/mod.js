@@ -7,7 +7,7 @@
 	discordLink: "",
 	initialStartPoints: new ExpantaNum (0), // Used for hard resets and new players
 	
-	offlineLimit: 10,  // In hours
+	offlineLimit: 1,  // In hours
 }
 
 // Set your version in num and name
@@ -42,6 +42,7 @@ function getPointGen() {
 	let gain = new ExpantaNum(0)
 	if(hasUpgrade("z",11))gain=gain.add(0.05)
 	gain=gain.mul(player.z.huoyanbeishu)
+	if(hasUpgrade('f',11))gain=gain.mul(layers.f.upgrades[11].EFFECT())
 	return gain
 }
 

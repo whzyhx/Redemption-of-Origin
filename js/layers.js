@@ -40,6 +40,7 @@ addLayer("cg",
             canClick(){return true},
             onClick(){
                 player.cg.kanwanCG=n(2)
+                showTab('none')
             }
         },
     },
@@ -99,6 +100,8 @@ addLayer("c",
             twohang:n(1),
             threehang:n(1),
             fourhang:n(1),
+
+            lingting:zero,lingtingshijian:zero,
         }
     },
     color: "orange",
@@ -134,13 +137,21 @@ addLayer("c",
         {
             player.c.mimang=n(2)
         }
+        if(player.c.lingting.gte(0.5))
+        {
+            player.c.lingtingshijian=player.c.lingtingshijian.add(diff)
+        }
+        if(player.c.lingtingshijian.gte(30))
+        {
+            player.c.lingting=n(2)
+        }
     },
     infoboxes:
     {
         lore:
         {
             title: "故事",
-            body() { return "<h3>几天的祈祷之后,眼前的神像终于发生了一些变化<br>微弱的乳白色光晕缓缓散开,你的眼底倒映着希望<br><br>注意:同行的祈祷会让别的祈祷更加困难(毕竟,这个神像承载的力量是有限的)" },
+            body() { return "<h3>几天的祈祷之后,眼前的神像终于发生了一些变化<br>微弱的乳白色光晕缓缓散开,你的眼底倒映着希望<br><br>注意:同行的祈祷会让别的祈祷更加困难<br>(毕竟,这个神像承载的力量是有限的)" },
         },
     },
     bars: 
@@ -154,6 +165,27 @@ addLayer("c",
             unlocked(){return player.c.mimang.gte(0.5) && player.c.mimang.lte(1.5)},
             display(){return '沟通神明中...'},
             progress() { return player.c.goutongshijian.div(30) },
+        },
+        2: 
+        {
+            direction: RIGHT,
+            width: 300,
+            height: 20,
+            fillStyle(){return {"background-color":"orange"}},
+            unlocked(){return player.c.lingting.gte(0.5) && player.c.lingting.lte(1.5)},
+            display(){
+                var s=''
+                var ch=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+                for(var i=0;i<36;i++)
+                {
+                    var x=zero
+                    x=x.add(Math.random())
+                    x=x.mul(26).floor().min(25)
+                    s=s+ch[x]
+                }
+                return s
+            },
+            progress() { return player.c.lingtingshijian.div(30) },
         },
     },
     clickables:
@@ -191,6 +223,21 @@ addLayer("c",
             {
                 player.points=player.points.sub(3)
                 player.c.mimang=n(1)
+            }
+        },
+        13:
+        {
+            display()
+            {
+                return '聆听<br><br>花费:10000信仰' 
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return player.c.lingting.lte(1.5)},
+            canClick(){return player.points.gte(10000) && player.c.lingting.lte(0.5)},
+            onClick()
+            {
+                player.points=player.points.sub(10000)
+                player.c.lingting=n(1)
             }
         },
     },
@@ -386,6 +433,9 @@ addLayer("c",
                 "blank",
                 "blank",
                 ["row",[["upgrade",'shengji1'],]],
+                ["row",[["clickable",13],]],
+                "blank",
+                ["row",[["bar",2],]],
                 "blank",
                 "blank",
                 "blank",
@@ -433,6 +483,12 @@ addLayer("z",
 
             mutou:zero,shitou:zero,
             mutoushangxian:n(150),shitoushangxian:n(150),
+
+            shazi:zero,boli:zero,
+            yitianchong:zero,jindu:zero,wendu:n(15),bolizhuangtai:zero,
+
+            tongpianyitianchong:zero,tongpianhoudu:n(5),lengque:zero,
+
             tong:zero,tie:zero,mei:zero,ying:zero,jin:zero,
             tongshangxian:n(20),tieshangxian:n(20),meishangxian:n(20),yingshangxian:n(20),jinshangxian:n(20),
             tanxianjindu:zero,
@@ -451,6 +507,12 @@ addLayer("z",
             fivehang:n(1),
             sixhang:n(1),
             sevenhang:n(1),
+            eighthang:n(1),
+            ninehang:n(1),
+            tenhang:n(1),
+            shiyihang:n(1),
+            shierhang:n(1),
+            shisanhang:n(1),
         }
     },
     color: "lightblue",
@@ -470,9 +532,42 @@ addLayer("z",
         var exp=new ExpantaNum(1)
         return exp
     },
-    tooltip(){return ""},
+    tooltip(){
+        return ""
+    },
     update(diff)
     {
+        if(player.z.tongpianhoudu.lte(0.5))
+        {
+            player.z.tongpianyitianchong=n(2)
+        }
+        if(player.z.bolizhuangtai.gte(1.5))
+        {
+            player.z.wendu=player.z.wendu.add(n(100).mul(diff))
+            player.z.jindu=player.z.jindu.add(n(0.1).mul(diff))
+        }
+        if(player.z.bolizhuangtai.gte(0.5))
+        {
+            player.z.wendu=player.z.wendu.sub(n(40).mul(diff))
+            player.z.jindu=player.z.jindu.add(n(0.01).mul(diff))
+        }
+        if(player.z.wendu.gte(750) || player.z.wendu.lte(5))
+        {
+            player.z.wendu=n(15)
+            player.z.jindu=n(0)
+            player.z.bolizhuangtai=n(0)
+            player.z.yitianchong=n(0)
+        }
+        if(player.z.jindu.gte(5))
+        {
+            player.z.yitianchong=n(2)
+            player.z.wendu=n(15)
+            player.z.bolizhuangtai=n(0)
+        }
+        player.z.shazi=player.z.shazi.mul(n(0.9).pow(diff)).max(0.0001)
+
+        //////////////////////////////////////////////////////////////////////////////////////
+
         if(hasUpgrade("c",31))
         {
             player.z.tilimx=player.z.tilimx.add(layers.c.upgrades[31].EFFECT().mul(diff))
@@ -511,6 +606,7 @@ addLayer("z",
         {
             player.z.mutouhuoqu=player.z.mutouhuoqu.mul(2)
         }
+        player.z.mutouhuoqu=player.z.mutouhuoqu.mul(player.f.caijibeishu)
         if(hasUpgrade("c",22))
         {
             player.z.huoyanhuoqu=player.z.huoyanhuoqu.mul(layers.c.upgrades[22].EFFECT())
@@ -527,6 +623,7 @@ addLayer("z",
         {
             player.z.shitouhuoqu=player.z.shitouhuoqu.mul(2)
         }
+        player.z.shitouhuoqu=player.z.shitouhuoqu.mul(player.f.caijibeishu)
 
         //////////////////////////////////////////////////////////////////////////////////////
         
@@ -572,6 +669,93 @@ addLayer("z",
             unlocked(){return true},
             display(){return '体力 '+format(player.z.tilinw)+'(+'+format(player.z.tilihuifu)+'/s) / '+format(player.z.tilimx)},
             progress() { return player.z.tilinw.div(player.z.tilimx) },
+        },
+        2: 
+        {
+            direction: RIGHT,
+            width: 400,
+            height: 20,
+            fillStyle(){
+                if(player.z.yitianchong.gte(1.5))
+                {
+                    return {"background-color":"grey"}
+                }
+                if(player.z.yitianchong.gte(0.5))
+                {
+                    if(player.z.bolizhuangtai.eq(1))
+                    {
+                        return {"background-color":"blue"}
+                    }
+                    if(player.z.bolizhuangtai.eq(2))
+                    {
+                        return {"background-color":"red"}
+                    }
+                    if(player.z.bolizhuangtai.eq(0))
+                    {
+                        return {"background-color":"lightblue"}
+                    }
+                }
+                return {"background-color":"lightblue"}
+            },
+            style(){
+                // if(player.z.yitianchong.gte(0.5))
+                // {
+                //     return {"background-color":"lightblue","color":"white","border-width":"2px"}
+                // }
+                return {"color":"white","border-width":"2px"}
+            },
+            unlocked(){return true},
+            display(){
+                if(player.z.yitianchong.gte(1.5))
+                {
+                    return '钢化玻璃'
+                }
+                if(player.z.yitianchong.gte(0.5))
+                {
+                    return '玻璃: '+format(player.z.wendu)+' <sup>o</sup>C'
+                }
+                return '无'
+            },
+            progress() {
+                return player.z.jindu.div(5)
+            },
+        },
+        3: 
+        {
+            direction: RIGHT,
+            width: 400,
+            height:function(){
+                return player.z.tongpianhoudu.mul(10)
+            },
+            fillStyle(){
+                if(player.z.tongpianyitianchong.gte(0.5))
+                {
+                    return {"background-color":"brown"}
+                }
+                return {"background-color":"black"}
+            },
+            style(){
+                // if(player.z.yitianchong.gte(0.5))
+                // {
+                //     return {"background-color":"lightblue","color":"white","border-width":"2px"}
+                // }
+                return {"color":"white","background-color":"brown"}
+            },
+            unlocked(){return true},
+            display(){
+                if(player.z.tongpianyitianchong.gte(0.5))
+                {
+                    return ''
+                }
+                return '无'
+            },
+            progress() {
+                if(player.z.tongpianyitianchong.gte(0.5))
+                {
+                    return 2
+                }
+                return 0
+            },
         },
     },
     clickables:
@@ -640,12 +824,12 @@ addLayer("z",
                 }
                 else if(x.lte(0.66))
                 {
-                    player.z.tong=player.z.tong.add(1).min(player.z.tongshangxian)
+                    player.z.tong=player.z.tong.add(n(1).mul(player.f.wakuangbeishu)).min(player.z.tongshangxian)
                     player.z.lastkuangwu=n(1)
                 }
                 else
                 {
-                    player.z.tie=player.z.tie.add(1).min(player.z.tieshangxian)
+                    player.z.tie=player.z.tie.add(n(1).mul(player.f.wakuangbeishu)).min(player.z.tieshangxian)
                     player.z.lastkuangwu=n(2)
                 }
             }
@@ -677,7 +861,7 @@ addLayer("z",
             onClick()
             {
                 player.z.tilinw=player.z.tilinw.sub(30)
-                player.z.mei=player.z.mei.add(1).min(player.z.meishangxian)
+                player.z.mei=player.z.mei.add(n(1).mul(player.f.wakuangbeishu)).min(player.z.meishangxian)
             }
         },
         24: {
@@ -691,7 +875,7 @@ addLayer("z",
             onClick()
             {
                 player.z.tilinw=player.z.tilinw.sub(40)
-                player.z.ying=player.z.ying.add(1).min(player.z.yingshangxian)
+                player.z.ying=player.z.ying.add(n(1).mul(player.f.wakuangbeishu)).min(player.z.yingshangxian)
             }
         },
         25: {
@@ -705,7 +889,7 @@ addLayer("z",
             onClick()
             {
                 player.z.tilinw=player.z.tilinw.sub(50)
-                player.z.jin=player.z.jin.add(1).min(player.z.jinshangxian)
+                player.z.jin=player.z.jin.add(n(1).mul(player.f.wakuangbeishu)).min(player.z.jinshangxian)
             }
         },
         31: {
@@ -722,10 +906,40 @@ addLayer("z",
                 player.z.tilinw=n(0)
             }
         },
+        41: {
+            display() 
+            {
+                return '挖沙<br><br>消耗:50体力<br><br>注:沙子没有储存上限,但每秒会流失10%的沙子'
+            },
+            unlocked(){return hasUpgrade("z",81)},
+            style(){return {"height":"125px"}},
+            canClick(){return player.z.tilinw.gte(50.001)},
+            onClick()
+            {
+                player.z.tilinw=player.z.tilinw.sub(50)
+                player.z.shazi=player.z.shazi.add(n(1).mul(player.f.wakuangbeishu))
+            }
+        },
+        42: {
+            display() 
+            {
+                return '烧制玻璃<br><br>消耗:50体力 5沙子 1煤'
+            },
+            unlocked(){return hasUpgrade("z",91)},
+            style(){return {"height":"125px"}},
+            canClick(){return player.z.tilinw.gte(50.001) && player.z.shazi.gte(5) && player.z.mei.gte(1)},
+            onClick()
+            {
+                player.z.tilinw=player.z.tilinw.sub(50)
+                player.z.shazi=player.z.shazi.sub(5)
+                player.z.mei=player.z.mei.sub(1)
+                player.z.boli=player.z.boli.add(1)
+            }
+        },
         'jz11': {
             display() 
             {
-                return '建造-箱子<br><br>消耗:10体力,25木头,25石头<br><br>提供:50木头上限,50石头上限'
+                return '建造-箱子<br><br>消耗:10体力,25木头,25石头<br><br>提供:50木头/石头上限'
             },
             unlocked(){return true},
             style(){return {"height":"125px"}},
@@ -773,6 +987,111 @@ addLayer("z",
                 player.z.jinshangxian=player.z.jinshangxian.add(10)
             }
         },
+        'jz22': {
+            display() 
+            {
+                return '建造-窝棚<br><br>消耗:100体力,300木头,300石头<br><br>提供:1000木头/石头上限'
+            },
+            unlocked(){return hasUpgrade("z",61)},
+            style(){return {"height":"125px"}},
+            canClick(){return player.z.tilinw.gte(100) && player.z.mutou.gte(300) && player.z.shitou.gte(300)},
+            onClick()
+            {
+                player.z.tilinw=player.z.tilinw.sub(100)
+                player.z.mutou=player.z.mutou.sub(300)
+                player.z.shitou=player.z.shitou.sub(300)
+                player.z.mutoushangxian=player.z.mutoushangxian.add(1000)
+                player.z.shitoushangxian=player.z.shitoushangxian.add(1000)
+            }
+        },
+        'sw1': {
+            display() 
+            {
+                return '填充<br><br>消耗:20玻璃'
+            },
+            unlocked(){return hasUpgrade("z",91) && player.z.yitianchong.lte(0.5)},
+            style(){return {"height":"125px"}},
+            canClick(){return player.z.boli.gte(20)},
+            onClick()
+            {
+                player.z.boli=player.z.boli.sub(20)
+                player.z.yitianchong=n(1)
+            }
+        },
+        'sw1-1': {
+            display() 
+            {
+                return '加热<br>+100 <sup>o</sup>C/s'
+            },
+            unlocked(){return player.z.yitianchong.gte(0.5) && hasUpgrade("z",101) && player.z.yitianchong.lte(1.5)},
+            style(){return {"height":"125px"}},
+            canClick(){return player.z.bolizhuangtai.lte(1.5)},
+            onClick()
+            {
+                player.z.bolizhuangtai=n(2)
+            }
+        },
+        'sw1-2': {
+            display() 
+            {
+                return '冷却<br>-40 <sup>o</sup>C/s'
+            },
+            unlocked(){return player.z.yitianchong.gte(0.5) && hasUpgrade("z",102) && player.z.yitianchong.lte(1.5)},
+            style(){return {"height":"125px"}},
+            canClick(){return player.z.bolizhuangtai.lte(0.5) || player.z.bolizhuangtai.gte(1.5)},
+            onClick()
+            {
+                player.z.bolizhuangtai=n(1)
+            }
+        },
+        'sw1-3': {
+            display() 
+            {
+                return '停止'
+            },
+            unlocked(){return player.z.yitianchong.gte(0.5) && player.z.yitianchong.lte(1.5)},
+            style(){return {"height":"125px"}},
+            canClick(){return player.z.bolizhuangtai.gte(0.5)},
+            onClick()
+            {
+                player.z.bolizhuangtai=n(0)
+            }
+        },
+        'sw2': {
+            display() 
+            {
+                return '填充<br><br>消耗:50铜'
+            },
+            unlocked(){return hasUpgrade("z",82) && player.z.tongpianyitianchong.lte(0.5)},
+            style(){return {"height":"125px"}},
+            canClick(){return player.z.tong.gte(50)},
+            onClick()
+            {
+                player.z.tong=player.z.tong.sub(50)
+                player.z.tongpianyitianchong=n(1)
+            }
+        },
+        'sw2-1': {
+            display() 
+            {
+                return '压缩<br><br>消耗:500体力<br><br>'+'铜片 厚度: '+format(player.z.tongpianhoudu)+' cm'
+            },
+            unlocked(){return player.z.tongpianyitianchong.gte(0.5) && hasUpgrade("z",82) && player.z.tongpianyitianchong.lte(1.5)},
+            style(){return {"height":"125px","width":"150px"}},
+            canClick(){return player.z.tilinw.gte(500)},
+            onClick()
+            {
+                player.z.tilinw=player.z.tilinw.sub(500)
+                if(hasUpgrade("z",92))
+                {
+                    player.z.tongpianhoudu=player.z.tongpianhoudu.div(1.05)
+                }
+                else
+                {
+                    player.z.tongpianhoudu=player.z.tongpianhoudu.div(1.02)
+                }
+            }
+        },
     },
     upgrades:
     {
@@ -792,7 +1111,7 @@ addLayer("z",
             },
             style(){return {"height":"125px","width":"125px"}},
             unlocked(){return true},
-            branches:[21,22,23],
+            branches:[21,22,23,61,62],
         },
         21:{
             fullDisplay()
@@ -952,7 +1271,7 @@ addLayer("z",
             },
             canAfford()
             {
-                return player.z.zhishi.gte(n(300).mul(player.z.twohang))
+                return player.z.zhishi.gte(n(300).mul(player.z.fourhang))
             },
             style(){return {"height":"125px","width":"125px"}},
             unlocked(){return hasUpgrade("z",33)},
@@ -1014,13 +1333,14 @@ addLayer("z",
             },
             style(){return {"height":"125px","width":"125px"}},
             unlocked(){return hasUpgrade("z",43)},
+            branches:[63],
         },
         53:{
             fullDisplay()
             {
-                if(player.z.tanxianjindu.lte(15000))
+                if(player.z.tanxianjindu.lte(10000))
                 {
-                    return '???<br><br>解锁于:探险进度30%'
+                    return '???<br><br>解锁于:探险进度20%'
                 }
                 return '金<br>在探险的时候发现一种新的矿物-金<br>现在你可以采集金矿了<br><br>花费:'+format(n(2000))+'知识' 
             },
@@ -1030,10 +1350,241 @@ addLayer("z",
             },
             canAfford()
             {
-                return player.z.zhishi.gte(n(2000)) && player.z.tanxianjindu.gte(15000)
+                return player.z.zhishi.gte(n(2000)) && player.z.tanxianjindu.gte(10000)
             },
             style(){return {"height":"125px","width":"125px"}},
             unlocked(){return hasUpgrade("z",43)},
+            branches:[63],
+        },
+        61:{
+            fullDisplay()
+            {
+                return '环保主义<br>需要更多的空间!<br>解锁更多物资储存建筑<br><br>花费:'+format(n(2000).mul(player.z.sixhang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(2000).mul(player.z.sixhang))
+                player.z.sixhang=player.z.sixhang.mul(2)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(2000).mul(player.z.sixhang)) && player.z.tanxianjindu.gte(1500) && hasUpgrade("z",51) && hasUpgrade("z",52) && hasUpgrade("z",53) && !hasUpgrade("z",62)
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return   hasUpgrade("z",51) && hasUpgrade("z",52) && hasUpgrade("z",53) && !hasUpgrade("z",62)},
+            branches:[71],
+        },
+        62:{
+            fullDisplay()
+            {
+                return '堆放<br>你忽然想起现在只有你一个人了<br>为什么把多余的资源放在地上呢<br><text style="color:red">你现在不需要资源上限了</text><br>花费:'+format(n(2000).mul(player.z.sixhang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(2000).mul(player.z.sixhang))
+                player.z.sixhang=player.z.sixhang.mul(2)
+                player.z.mutoushangxian=n(1e100)
+                player.z.shitoushangxian=n(1e100)
+                player.z.tieshangxian=n(1e100)
+                player.z.tongshangxian=n(1e100)
+                player.z.meishangxian=n(1e100)
+                player.z.jinshangxian=n(1e100)
+                player.z.yingshangxian=n(1e100)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(2000).mul(player.z.sixhang)) && player.z.tanxianjindu.gte(1500) && hasUpgrade("z",51) && hasUpgrade("z",52) && hasUpgrade("z",53) && !hasUpgrade("z",61)
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return hasUpgrade("z",51) && hasUpgrade("z",52) && hasUpgrade("z",53) && !hasUpgrade("z",61)},
+            branches:[71],
+        },
+        63:{
+            fullDisplay()
+            {
+                return '结合<br>科技+魔法=???<br><br>解锁 子面板-符文<br><br>花费:'+format(n(2000).mul(player.z.sixhang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(2000).mul(player.z.sixhang))
+                player.z.sixhang=player.z.sixhang.mul(2)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(2000).mul(player.z.sixhang)) && hasUpgrade("z",52) && hasUpgrade("z",53)
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return hasUpgrade("z",52) && hasUpgrade("z",53)},
+            branches:[71],
+        },
+        71:{
+            fullDisplay()
+            {
+                return '<h1>突飞猛进</h1><br>强大的法力让你对新的事物掌握的无比快速<br><br><h2><text style="color:orange">准备接受新的神谕吧</text></h2><br><br>花费:'+format(20000)+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(20000)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(20000)
+            },
+            style(){return {"height":"125px","width":"750px"}},
+            unlocked(){return hasUpgrade("f",'fw31')},
+            branches:[81,82,83,84],
+        },
+        81:{
+            fullDisplay()
+            {
+                return '原材料-沙子<br>神告诉你:想让制作二级圣物,需要钢化玻璃<br>因此沙子是必须品<br>现在你可以挖沙子了<br><br>花费:'+format(n(5000).mul(player.z.eighthang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(5000).mul(player.z.eighthang))
+                player.z.eighthang=player.z.eighthang.mul(2)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(5000).mul(player.z.eighthang))
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return player.c.lingting.gte(1.5)},
+            branches:[91],
+        },
+        82:{
+            fullDisplay()
+            {
+                return '原材料-压缩铜<br>神告诉你:想让制作二级圣物,需要铜片<br><br>现在你可以尝试压缩铜了<br><br>花费:'+format(n(5000).mul(player.z.eighthang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(5000).mul(player.z.eighthang))
+                player.z.eighthang=player.z.eighthang.mul(2)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(5000).mul(player.z.eighthang))
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return player.c.lingting.gte(1.5)},
+            branches:[92],
+        },
+        83:{
+            fullDisplay()
+            {
+                return '原材料-魔法合金<br>神告诉你:想让制作二级圣物,需要魔法合金<br><br>现在你可以着手制作合金了<br><br>花费:'+format(n(5000).mul(player.z.eighthang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(5000).mul(player.z.eighthang))
+                player.z.eighthang=player.z.eighthang.mul(2)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(5000).mul(player.z.eighthang))
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return player.c.lingting.gte(1.5)},
+        },
+        84:{
+            fullDisplay()
+            {
+                return '原材料-导线<br>神告诉你:想让能量正常流通,需要导线<br><br>现在你可以制作导线了<br><br>花费:'+format(n(5000).mul(player.z.eighthang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(5000).mul(player.z.eighthang))
+                player.z.eighthang=player.z.eighthang.mul(2)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(5000).mul(player.z.eighthang))
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return player.c.lingting.gte(1.5)},
+        },
+        91:{
+            fullDisplay()
+            {
+                return '原材料-玻璃<br>神告诉你:想让制作二级圣物,需要钢化玻璃<br>因此你需要先拥有玻璃<br>现在你可以烧制玻璃了<br>花费:'+format(n(10000).mul(player.z.ninehang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(10000).mul(player.z.ninehang))
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(10000).mul(player.z.ninehang))
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return hasUpgrade("z",81)},
+            branches:[101,102],
+        },
+        92:{
+            fullDisplay()
+            {
+                return '快速压缩<br>更好的技巧<br>每次压缩铜片 /1.02=>/1.05<br>花费:'+format(n(10000).mul(player.z.ninehang))+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(10000).mul(player.z.ninehang))
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(10000).mul(player.z.ninehang))
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return hasUpgrade("z",82)},
+        },
+        101:{
+            fullDisplay()
+            {
+                return '加热<br><br>你知道如何加热玻璃了<br><br>花费:'+format(10000)+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(10000)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(10000)
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return hasUpgrade("z",91)},
+        },
+        102:{
+            fullDisplay()
+            {
+                return '冷却<br><br>你知道如何冷却玻璃了<br><br>花费:'+format(10000)+'知识' 
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(10000)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(10000)
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return hasUpgrade("z",91)},
+        },
+        111:{
+            fullDisplay()
+            {
+                return '下一个目标<br><br>二级圣物:太阳能板<br><br>前置:???'
+            },
+            onPurchase()
+            {
+                player.z.zhishi=player.z.zhishi.sub(n(2000).mul(player.z.sixhang))
+                player.z.sixhang=player.z.sixhang.mul(2)
+            },
+            canAfford()
+            {
+                return player.z.zhishi.gte(n(2000).mul(player.z.sixhang)) && hasUpgrade("z",52) && hasUpgrade("z",53)
+            },
+            style(){return {"height":"125px","width":"150px"}},
+            unlocked(){return hasUpgrade("z",52) && hasUpgrade("z",53)},
         },
         'jz11':{
             fullDisplay()
@@ -1133,6 +1684,18 @@ addLayer("z",
                 ["row",[["upgrade",41],"blank","blank","blank",["upgrade",42],"blank","blank","blank",["upgrade",43],]],
                 "blank",
                 ["row",["blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank",["upgrade",51],"blank","blank","blank",["upgrade",52],"blank","blank","blank",["upgrade",53],]],
+                "blank",
+                ["row",["blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank","blank",["upgrade",61],["upgrade",62],"blank","blank","blank",["upgrade",63],]],
+                "blank",
+                ["row",[["upgrade",71]]],
+                "blank",
+                ["row",[["upgrade",81],"blank","blank","blank",["upgrade",82],"blank","blank","blank",["upgrade",83],"blank","blank","blank",["upgrade",84],]],
+                "blank",
+                ["row",[["upgrade",91],"blank","blank","blank",["upgrade",92],"blank","blank","blank",["upgrade",93],"blank","blank","blank",["upgrade",94],]],
+                "blank",
+                ["row",[["upgrade",101],"blank","blank","blank",["upgrade",102],"blank","blank","blank",["upgrade",103],"blank","blank","blank",["upgrade",104],]],
+                "blank",
+                ["row",[["upgrade",111]]],
             ]
         },
         行动:
@@ -1156,66 +1719,67 @@ addLayer("z",
                 "blank",
                 ["row",[["clickable",11],["clickable",12],["clickable",13],]],
                 ["row",[["clickable",21],["clickable",22],["clickable",23],["clickable",24],["clickable",25],]],
+                ["row",[["clickable",41],["clickable",42],["clickable",43],["clickable",44],["clickable",45],]],
                 "blank",
                 ["row",[["clickable",31],]],
             ]
         },
-        资源:
-        {
-            unlocked(){return hasUpgrade("z",21) || hasUpgrade("z",22) || hasUpgrade("z",23)},
-            content:
-            [
-                "blank",
-                ["display-text",
-                    function() { return '你有 '+format(player.z.mutou)+' / '+format(player.z.mutoushangxian)+' 木头 '},
-                    { "color": "green", "font-size": "28px",}
-                ],
-                ["display-text",
-                    function() { return '你有 '+format(player.z.shitou)+' / '+format(player.z.shitoushangxian)+' 石头 '},
-                    { "color": "grey", "font-size": "28px",}
-                ],
-                ["display-text",
-                    function() {
-                        if(hasUpgrade("z",42))
-                        return '你有 '+format(player.z.tong)+' / '+format(player.z.tongshangxian)+' 铜矿'
-                        return ''
-                    },
-                    { "color": "brown", "font-size": "28px",}
-                ],
-                ["display-text",
-                    function() {
-                        if(hasUpgrade("z",42))
-                        return '你有 '+format(player.z.tie)+' / '+format(player.z.tieshangxian)+ ' 铁矿'
-                        return ''
-                    },
-                    { "color": "silver", "font-size": "28px",}
-                ],
-                ["display-text",
-                    function() {
-                        if(hasUpgrade("z",51))
-                        return '你有 '+format(player.z.mei)+' / '+format(player.z.meishangxian)+' 煤矿'
-                        return ''
-                    },
-                    { "color": "#504A4B", "font-size": "28px",}
-                ],
-                ["display-text",
-                    function() {
-                        if(hasUpgrade("z",52))
-                        return '你有 '+format(player.z.ying)+' / '+format(player.z.yingshangxian)+' 银矿'
-                        return ''
-                    },
-                    { "color": "lightblue", "font-size": "28px",}
-                ],
-                ["display-text",
-                    function() {
-                        if(hasUpgrade("z",53))
-                        return '你有 '+format(player.z.jin)+' / '+format(player.z.jinshangxian)+' 金矿'
-                        return ''
-                    },
-                    { "color": "gold", "font-size": "28px",}
-                ],
-            ]
-        },
+        // 资源:
+        // {
+        //     unlocked(){return hasUpgrade("z",21) || hasUpgrade("z",22) || hasUpgrade("z",23)},
+        //     content:
+        //     [
+        //         "blank",
+        //         ["display-text",
+        //             function() { return '你有 '+format(player.z.mutou)+' / '+format(player.z.mutoushangxian)+' 木头 '},
+        //             { "color": "green", "font-size": "28px",}
+        //         ],
+        //         ["display-text",
+        //             function() { return '你有 '+format(player.z.shitou)+' / '+format(player.z.shitoushangxian)+' 石头 '},
+        //             { "color": "grey", "font-size": "28px",}
+        //         ],
+        //         ["display-text",
+        //             function() {
+        //                 if(hasUpgrade("z",42))
+        //                 return '你有 '+format(player.z.tong)+' / '+format(player.z.tongshangxian)+' 铜矿'
+        //                 return ''
+        //             },
+        //             { "color": "brown", "font-size": "28px",}
+        //         ],
+        //         ["display-text",
+        //             function() {
+        //                 if(hasUpgrade("z",42))
+        //                 return '你有 '+format(player.z.tie)+' / '+format(player.z.tieshangxian)+ ' 铁矿'
+        //                 return ''
+        //             },
+        //             { "color": "silver", "font-size": "28px",}
+        //         ],
+        //         ["display-text",
+        //             function() {
+        //                 if(hasUpgrade("z",51))
+        //                 return '你有 '+format(player.z.mei)+' / '+format(player.z.meishangxian)+' 煤矿'
+        //                 return ''
+        //             },
+        //             { "color": "#504A4B", "font-size": "28px",}
+        //         ],
+        //         ["display-text",
+        //             function() {
+        //                 if(hasUpgrade("z",52))
+        //                 return '你有 '+format(player.z.ying)+' / '+format(player.z.yingshangxian)+' 银矿'
+        //                 return ''
+        //             },
+        //             { "color": "lightblue", "font-size": "28px",}
+        //         ],
+        //         ["display-text",
+        //             function() {
+        //                 if(hasUpgrade("z",53))
+        //                 return '你有 '+format(player.z.jin)+' / '+format(player.z.jinshangxian)+' 金矿'
+        //                 return ''
+        //             },
+        //             { "color": "gold", "font-size": "28px",}
+        //         ],
+        //     ]
+        // },
         建筑:
         {
             unlocked(){return hasUpgrade("z",34)},
@@ -1225,7 +1789,41 @@ addLayer("z",
                 ["row",[["bar",1],]],
                 "blank",
                 ["row",[["clickable",'jz11'],["upgrade",'jz11'],["upgrade",'jz12'],["upgrade",'jz13'],["upgrade",'jz14'],]],
-                ["row",[["clickable",'jz21'],]],
+                ["row",[["clickable",'jz21'],["clickable",'jz22'],]],
+            ]
+        },
+        圣物:
+        {
+            unlocked(){return player.c.lingting.gte(1.5)},
+            content:
+            [
+                "blank",
+                ["display-text",
+                    function() { return '一级圣物:日晷(已完成)'},
+                    { "color": "white", "font-size": "28px",}
+                ],
+                "blank",
+                ["display-text",
+                    function() { return '二级圣物:太阳能板(未完成)'},
+                    { "color": "white", "font-size": "28px",}
+                ],
+                ["display-text",
+                    function() {
+                        if(player.z.yitianchong.gte(0.5) && player.z.yitianchong.lte(1.5))
+                        return '温馨提示:合适的玻璃温度应该在5<sup>o</sup>C~750<sup>o</sup>C,否则就会损坏'},
+                    { "color": "white", "font-size": "16px",}
+                ],
+                ["display-text",
+                    function() {
+                        if(player.z.tongpianyitianchong.gte(0.5) && player.z.tongpianyitianchong.lte(1.5))
+                        return '温馨提示:良好的铜片厚度应该5mm以下哦'},
+                    { "color": "white", "font-size": "16px",}
+                ],
+                "blank",
+                "blank",
+                "blank",
+                ["row",[["clickable","sw1"],["bar",2],["clickable","sw1-1"],["clickable","sw1-2"],["clickable","sw1-3"],]],
+                ["row",[["clickable","sw2"],["bar",3],["clickable","sw2-1"],]],
             ]
         },
     },
@@ -1244,9 +1842,11 @@ addLayer("f",
         return{
             unlocked: true,
             points: new ExpantaNum(0),
-            fali:zero,falitotal:zero,
+            fali:zero,falitotal:zero,falilianjie:n(10),
 
             monengguantixuyao:n(10),monengguanticishu:zero,monengguantijiacheng:n(1),
+
+            fumobeishu:n(1),caijibeishu:n(1),wakuangbeishu:n(1),
         }
     },
     color: "magenta",
@@ -1289,7 +1889,7 @@ addLayer("f",
         'yongjiu-1': {
             display() 
             {
-                return '法力灌体<br><br>最原始,最狂暴的法力注入你的身体<br>痛苦,但确实值得的<br>-增幅体力恢复-<br><br>花费'+format(player.f.monengguantixuyao)+'法力<br>当前:x'+format(player.f.monengguantijiacheng)+'(下一级:x'+format(player.f.monengguantijiacheng.mul(1.05))+')<br>已经灌体:'+format(player.f.monengguanticishu)+'次'
+                return '法力灌体<br><br>最原始,最狂暴的法力注入你的身体<br>痛苦,但确实值得的<br>-增幅体力恢复-<br><br>花费'+format(player.f.monengguantixuyao)+'法力<br>当前:x'+format(player.f.monengguantijiacheng)+'(下一次:x'+format(player.f.monengguantijiacheng.mul(1.05))+')<br>已经灌体:'+format(player.f.monengguanticishu)+'次'
             },
             unlocked(){return true},
             style(){return {"height":"175px","width":"175px"}},
@@ -1303,6 +1903,158 @@ addLayer("f",
             }
         },
     },
+    upgrades:
+    {
+        11:{
+            EFFECT()
+            {
+                var eff=one
+                if(player.f.falitotal.mul(player.f.falilianjie).gte(player.points))
+                {
+                    eff=player.points.root(4)
+                }
+                return eff
+            },
+            fullDisplay()
+            {
+                return '信仰连接<br>你用你的法力把你的信仰串联在一起<br>但你的法力总量是有限的,一旦你的信仰超过了你的连接上限,该升级将失去效果<br>(注:每点法力可以为'+format(player.f.falilianjie)+'点信仰提供连接)<br>效果:信仰增幅信仰<br>当前增幅:'+format(layers.f.upgrades[11].EFFECT())+'x<br>花费:100法力'
+            },
+            onPurchase()
+            {
+                player.f.fali=player.f.fali.sub(100)
+            },
+            canAfford()
+            {
+                return player.f.fali.gte(100)
+            },
+            style(){return {"height":"175px","width":"175px"}},
+            unlocked(){return player.f.monengguanticishu.gte(3)},
+        },
+        'fw11':{
+            fullDisplay()
+            {
+                return '效率I<br><br>手动采集效率x1.5<br>额外花费倍数x5<br><br>花费:'+format(n(100).mul(player.f.fumobeishu))+'法力' 
+            },
+            onPurchase()
+            {
+                player.f.fali=player.f.fali.sub(n(100).mul(player.f.fumobeishu))
+                player.f.fumobeishu=player.f.fumobeishu.mul(5)
+                player.f.caijibeishu=player.f.caijibeishu.mul(1.5)
+            },
+            canAfford()
+            {
+                return player.f.fali.gte(n(100).mul(player.f.fumobeishu))
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return true},
+        },
+        'fw12':{
+            fullDisplay()
+            {
+                return '效率II<br><br>手动采集效率x2<br>额外花费倍数x7<br><br>花费:'+format(n(100).mul(player.f.fumobeishu))+'法力' 
+            },
+            onPurchase()
+            {
+                player.f.fali=player.f.fali.sub(n(100).mul(player.f.fumobeishu))
+                player.f.fumobeishu=player.f.fumobeishu.mul(7)
+                player.f.caijibeishu=player.f.caijibeishu.mul(2)
+            },
+            canAfford()
+            {
+                return player.f.fali.gte(n(100).mul(player.f.fumobeishu)) && hasUpgrade("f",'fw11')
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return true},
+        },
+        'fw13':{
+            fullDisplay()
+            {
+                return '效率III<br><br>手动采集效率x3<br>额外花费倍数x10<br><br>花费:'+format(n(100).mul(player.f.fumobeishu))+'法力' 
+            },
+            onPurchase()
+            {
+                player.f.fali=player.f.fali.sub(n(100).mul(player.f.fumobeishu))
+                player.f.fumobeishu=player.f.fumobeishu.mul(10)
+                player.f.caijibeishu=player.f.caijibeishu.mul(3)
+            },
+            canAfford()
+            {
+                return player.f.fali.gte(n(100).mul(player.f.fumobeishu)) && hasUpgrade("f",'fw12')
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return true},
+        },
+        'fw21':{
+            fullDisplay()
+            {
+                return '时运I<br><br>矿物掉落x1.2<br>额外花费倍数x5<br><br>花费:'+format(n(100).mul(player.f.fumobeishu))+'法力' 
+            },
+            onPurchase()
+            {
+                player.f.fali=player.f.fali.sub(n(100).mul(player.f.fumobeishu))
+                player.f.fumobeishu=player.f.fumobeishu.mul(5)
+                player.f.wakuangbeishu=player.f.wakuangbeishu.mul(1.2)
+            },
+            canAfford()
+            {
+                return player.f.fali.gte(n(100).mul(player.f.fumobeishu))
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return true},
+        },
+        'fw22':{
+            fullDisplay()
+            {
+                return '时运II<br><br>矿物掉落x1.5<br>额外花费倍数x7<br><br>花费:'+format(n(100).mul(player.f.fumobeishu))+'法力' 
+            },
+            onPurchase()
+            {
+                player.f.fali=player.f.fali.sub(n(100).mul(player.f.fumobeishu))
+                player.f.fumobeishu=player.f.fumobeishu.mul(7)
+                player.f.wakuangbeishu=player.f.wakuangbeishu.mul(1.5)
+            },
+            canAfford()
+            {
+                return player.f.fali.gte(n(100).mul(player.f.fumobeishu)) && hasUpgrade("f",'fw21')
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return true},
+        },
+        'fw23':{
+            fullDisplay()
+            {
+                return '时运III<br><br>矿物掉落x2<br>额外花费倍数x10<br><br>花费:'+format(n(100).mul(player.f.fumobeishu))+'法力' 
+            },
+            onPurchase()
+            {
+                player.f.fali=player.f.fali.sub(n(100).mul(player.f.fumobeishu))
+                player.f.fumobeishu=player.f.fumobeishu.mul(10)
+                player.f.wakuangbeishu=player.f.wakuangbeishu.mul(2)
+            },
+            canAfford()
+            {
+                return player.f.fali.gte(n(100).mul(player.f.fumobeishu)) && hasUpgrade("f",'fw22')
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return true},
+        },
+        'fw31':{
+            fullDisplay()
+            {
+                return '智慧I<br><br><i>想,想,想...</i><br>嗯,我似乎想出什么了<br>智商:120=>150<br><br>花费:'+format(2000)+'法力' 
+            },
+            onPurchase()
+            {
+                player.f.fali=player.f.fali.sub(2000)
+            },
+            canAfford()
+            {
+                return player.f.fali.gte(2000)
+            },
+            style(){return {"height":"125px","width":"125px"}},
+            unlocked(){return true},
+        },
+    },
     microtabs:
     {
         法术:
@@ -1314,6 +2066,10 @@ addLayer("f",
                 [
                     "blank",
                     ["row",[["clickable",'yongjiu-1']]],
+                    "blank",
+                    "blank",
+                    "blank",
+                    ["row",[["upgrade",11]]],
                 ],
             },
             临时:
@@ -1334,11 +2090,37 @@ addLayer("f",
                     { "color": "magenta", "font-size": "28px",}
                 ],
                 "blank",
+                ["display-text",
+                    function() { return '总计法力:'+format(player.f.falitotal)},
+                    { "color": "white", "font-size": "16px",}
+                ],
+                "blank",
                 ["row",[["clickable",11],]],
                 "blank",
                 ["microtabs","法术",{"border-width":"0px"}],
             ],
-        }
+        },
+        符文:
+        {
+            unlocked(){return hasUpgrade("z",63)},
+            content:
+            [
+                "blank",
+                ["display-text",
+                    function() { return '你当前有'+format(player.f.fali)+'法力'},
+                    { "color": "magenta", "font-size": "28px",}
+                ],
+                ["display-text",
+                    function() { return '当前消耗倍数为:x'+format(player.f.fumobeishu)+'<br>(注:智慧符文不受此效果影响)'},
+                    { "color": "white", "font-size": "16px",}
+                ],
+                "blank",
+                "blank",
+                ["row",[["upgrade","fw11"],["upgrade","fw12"],["upgrade","fw13"],]],
+                ["row",[["upgrade","fw21"],["upgrade","fw22"],["upgrade","fw23"],]],
+                ["row",[["upgrade","fw31"],["upgrade","fw32"],["upgrade","fw33"],]],
+            ],
+        },
     },
     row: 2,
     layerShown()
