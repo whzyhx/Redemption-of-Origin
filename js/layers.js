@@ -232,7 +232,7 @@ addLayer("c",
                 return '聆听<br><br>花费:10000信仰' 
             },
             style(){return {"height":"125px","width":"125px"}},
-            unlocked(){return player.c.lingting.lte(1.5)},
+            unlocked(){return player.c.lingting.lte(1.5) && hasUpgrade('z',71)},
             canClick(){return player.points.gte(10000) && player.c.lingting.lte(0.5)},
             onClick()
             {
